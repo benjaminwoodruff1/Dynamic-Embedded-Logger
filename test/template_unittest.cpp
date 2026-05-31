@@ -1,57 +1,28 @@
-#include <iostream>
 #include <gtest/gtest.h>
-#include "template_config.h"
-#include <iostream>
-#include <sstream>
 #include "template.h"
-#include <stdio.h>
-#include <fstream>
-#include <unistd.h>
 
-class LoggerUnitTest : public ::testing::Test {
-protected:
-    void SetUp() override {
-        disable_logging();
-        testing::internal::CaptureStdout();
-        }
-
-    void TearDown() override {
-        (void)testing::internal::GetCapturedStdout();
-    }
-
-    std::string GetCapturedOutput() {
-        std::string output = testing::internal::GetCapturedStdout();
-        testing::internal::CaptureStdout();
-        return output;
-    }
-};
-
-TEST_F(LoggerUnitTest, DefaultSateIsSilent) {
-    log_info_inline("Should be silent");
-    EXPECT_EQ(GetCapturedOutput(), "");
+// Test default log level is NONE
+TEST(LoggerTest, DefaultLogLevel) {
+    set_system_log_level(LOG_NAV, LOG_LEVEL_NONE);
+    testing::internal::CaptureStdout();
+    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "");
 }
 
-TEST_F(LoggerUnitTest, EnableLoggingOutputsMessages) {
-    enable_logging();
-    log_info_inline("Testing Enable");
-    EXPECT_EQ(GetCapturedOutput(), "[Log]: Testing Enable\n");
+TEST(LoggerTest, EnableLogLevel) {
+    set_system_log_level(LOG_NAV, LOG_LEVEL_INFO);
+    testing::internal::CaptureStdout();
+    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "Satellites active: %d", 3);
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "[NAV] [INFO]: Satellites active: 3\n");
 }
 
-TEST_F(LoggerUnitTest, DisableLoggingReturnsToSilent) {
-    enable_logging();
-    disable_logging();
-    log_info_inline("This should be silent");
-    EXPECT_EQ(GetCapturedOutput(), "");
-}
-
-int main (int argc, char** argv) {
-  std::cout << "============================================================="
-            << std::endl << "============== UT Suite for template (v"
-            << TEMPLATE_VERSION_MAJOR << "."
-            << TEMPLATE_VERSION_MINOR << "."
-            << TEMPLATE_VERSION_PATCH << ") ===============" << std::endl
-            << "============================================================="
-            << std::endl;
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+TEST(LoggerTest, Filter) {
+    set_system_log_level(LOG_NAV, LOG_LEVEL_WARNING);
+    testing::internal::CaptureStdout();
+    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
+    log_info_inline(LOG_NAV, LOG_LEVEL_WARNING, "Battery low: %.1f%%", 15.5);
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "System: NAV    WARNING: Battery low: 15.5%\n");
 }

@@ -1,14 +1,13 @@
 #include <stdio.h>
-#include <cstring>
-#include <stdbool.h>
-#include <iostream>
 #include "template.h"
 #include "template_config.h"
 
 void high_frequency_loop() {
-    for (int i = 0; i < 3; ++i) {
-        log_info_inline("Telemetry check...");
-    }
+    log_info_inline(LOG_NAV, LOG_LEVEL_DEBUG, "GPS satellites locked: %d", 5);
+    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "Current speed: %.2f m/s", 12.34);
+
+    log_info_inline(LOG_MOTOR, LOG_LEVEL_WARNING, "Motor temperature high: %.1f C", 85.5);
+    log_info_inline(LOG_MOTOR, LOG_LEVEL_ERROR, "Motor failure detected!");
 }
 
 int main(int argc, char** argv) {
@@ -17,14 +16,16 @@ int main(int argc, char** argv) {
     
     printf("--- Project ---\n");
 
-    // Test default state
+    printf("Default Silent Mode\n");
     high_frequency_loop();
-    // Test enabling logs
-    enable_logging();
+    printf("DONE.\n\n");
+
+    set_system_log_level(LOG_NAV, LOG_LEVEL_DEBUG);
+    set_system_log_level(LOG_MOTOR, LOG_LEVEL_WARNING);
+
+    printf("Silent Mode Disabled for NAV and MOTOR\n");
     high_frequency_loop();
-    // Test disabling logs
-    disable_logging();
-    high_frequency_loop();
+    printf("DONE.\n");
 
     return 0;
 }
