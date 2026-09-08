@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -Wall -O2 -shared -Wl,-soname,libtemplate.so -o ../../lib/libtemplate.so CMakeFiles/template.dir/template.cpp.o CMakeFiles/template.dir/template.c.o 
