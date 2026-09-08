@@ -8,7 +8,7 @@ A lightweight C++ logging subsystem built for resource-constrained, real-time em
 
 -  **Near-zero overhead when disabled** - a single short-circuited boolean check gates every log call; no function call, no formatting, no I/O when logging is off.
 -  **Per-subsystem, per-severity thresholds** - filter `NAV`, `MOTOR`, `SYSTEM`, and future subsystems independently, at runtime, without recompiling.
--  **Tested with GoogleTest** - automated unit tests assert exact output for every threshold boundary, alongside a manual integration smoke test.
+-  **Tested with GoogleTest and Robot Framework** - automated unit tests assert exact output for every threshold boundary, backed by an automated integration suite that exercises the compiled driver binary end-to-end.
 -  **Minimal surface area** - one header, one source file, no external dependencies beyond the C++ standard library and (optionally) GTest for testing.
 -  **CMake-driven build** - a single `cmake --build .` produces the library, driver binary, and test suite together.
 -  **Disassembly-verified** - `objdump -d` on a Release build confirms `high_frequency_loop()` compiles to a single byte-compare and conditional jump before the `logger()` call site — when logging is disabled, execution returns before the call instruction is ever reached, with no argument setup or I/O.
