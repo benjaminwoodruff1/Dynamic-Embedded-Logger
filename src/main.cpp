@@ -3,11 +3,10 @@
 #include "template_config.h"
 
 void high_frequency_loop() {
-    log_info_inline(LOG_NAV, LOG_LEVEL_DEBUG, "GPS satellites locked: %d", 5);
-    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "Current speed: %.2f m/s", 12.34);
-
-    log_info_inline(LOG_MOTOR, LOG_LEVEL_WARNING, "Motor temperature high: %.1f C", 85.5);
-    log_info_inline(LOG_MOTOR, LOG_LEVEL_ERROR, "Motor failure detected!");
+    // log_enabled is checked first. If log_enabled is false, && operator doesn't check check(),
+    // thus using near zero CPU cycles while log_enabled is disabled
+    log_enabled && logger(LOG_NAV, LOG_LEVEL_INFO, "Position updated");
+    log_enabled && logger(LOG_NAV, LOG_LEVEL_CRITICAL, "Position exposed");
 }
 
 int main(int argc, char** argv) {
@@ -15,17 +14,24 @@ int main(int argc, char** argv) {
     printf("Version: %d.%d.%d\n", TEMPLATE_VERSION_MAJOR, TEMPLATE_VERSION_MINOR, TEMPLATE_VERSION_PATCH);
     
     printf("--- Project ---\n");
-
-    printf("Default Silent Mode\n");
+    printf("Default Silent Mode\n"); //Initial state
     high_frequency_loop();
     printf("DONE.\n\n");
 
+    setting(); // Enable the logging display
+    
     set_system_log_level(LOG_NAV, LOG_LEVEL_DEBUG);
-    set_system_log_level(LOG_MOTOR, LOG_LEVEL_WARNING);
 
-    printf("Silent Mode Disabled for NAV and MOTOR\n");
+    printf("Silent Mode Disabled\n");
+    high_frequency_loop();
+    set_system_log_level(LOG_NAV, LOG_LEVEL_CRITICAL);
+    high_frequency_loop();
+    printf("DONE.\n\n");
+
+    setting(); // Disable the logging display
+    
+    printf("Silent Mode Enabled\n");
     high_frequency_loop();
     printf("DONE.\n");
-
     return 0;
 }

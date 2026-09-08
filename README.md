@@ -81,7 +81,7 @@ dynamic-embedded-logger/
 | Python | 3.13 | Required for integration tests only |
 | Robot Framework | 7.2.2 | Installed via `requirements.txt` |
 
----
+### 👤 Who built this
 
 ## Build Instructions
 
@@ -116,7 +116,8 @@ make check   # Compiles and immediately runs the UT suite + coverage report
 
 Binaries are placed in `build/bin/` and shared libraries in `build/lib/`.
 
----
+log_enabled && logger(LOG_NAV, LOG_LEVEL_INFO, "Position updated");
+// -> System: NAV    INFO: Position updated
 
 ## Running the Program
 

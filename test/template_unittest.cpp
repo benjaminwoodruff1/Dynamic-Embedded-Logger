@@ -5,7 +5,7 @@
 TEST(LoggerTest, DefaultLogLevel) {
     set_system_log_level(LOG_NAV, LOG_LEVEL_NONE);
     testing::internal::CaptureStdout();
-    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
+    logger(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_EQ(output, "");
 }
@@ -13,16 +13,16 @@ TEST(LoggerTest, DefaultLogLevel) {
 TEST(LoggerTest, EnableLogLevel) {
     set_system_log_level(LOG_NAV, LOG_LEVEL_INFO);
     testing::internal::CaptureStdout();
-    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "Satellites active: %d", 3);
+    logger(LOG_NAV, LOG_LEVEL_INFO, "Satellites active");
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "[NAV] [INFO]: Satellites active: 3\n");
+    EXPECT_EQ(output, "System: NAV    INFO: Satellites active\n");
 }
 
 TEST(LoggerTest, Filter) {
     set_system_log_level(LOG_NAV, LOG_LEVEL_WARNING);
     testing::internal::CaptureStdout();
-    log_info_inline(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
-    log_info_inline(LOG_NAV, LOG_LEVEL_WARNING, "Battery low: %.1f%%", 15.5);
+    logger(LOG_NAV, LOG_LEVEL_INFO, "This should not be printed");
+    logger(LOG_NAV, LOG_LEVEL_WARNING, "Battery low");
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "System: NAV    WARNING: Battery low: 15.5%\n");
+    EXPECT_EQ(output, "System: NAV    WARNING: Battery low\n");
 }

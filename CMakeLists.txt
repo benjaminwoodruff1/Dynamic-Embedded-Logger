@@ -96,8 +96,7 @@ IF(DO_UT)
     # Define the sources and executable for the UT suite
     set(${CMAKE_PROJECT_NAME}_unittest_src
         ${PROJECT_SOURCE_DIR}/test/${CMAKE_PROJECT_NAME}_unittest.cpp
-        ${PROJECT_SOURCE_DIR}/test/${CMAKE_PROJECT_NAME}_test.cpp
-    )
+        )
 
     # Add the component library interfaces to the test suite binary include path
     # Also add the binary directory to the include search path (for generated ${CMAKE_PROJECT_NAME}_config.h)
