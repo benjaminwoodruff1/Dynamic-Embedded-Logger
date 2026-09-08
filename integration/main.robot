@@ -1,49 +1,56 @@
 *** Settings ***
-Name             Integration Test Suite
-Documentation    A simple test suite that executes the 'main' binary with various inputs.
-...              To run this, installation of ``requirements.txt``, typically into a python
-...              virtual environment, is required. Run this test suite from the root of the
-...              repository via ``robot integration/main.robot``
-Library           Process
-Library           String
+Documentation    Integration test suite that runs the logger driver binary
+...              (template_bin) and verifies its log output end-to-end,
+...              exercising the log_enabled short-circuit gate and
+...              per-subsystem severity filtering described in the README.
+...              Build the binary first (see Build Instructions), then run
+...              from the repo root via: robot integration/main.robot
+Library          Process
+Library          String
 
 *** Variables ***
-# Path to target binary, again, from root of repository
 ${CLI_CMD}        build/bin/template_bin
+# The logger prints 4 literal spaces between the subsystem and level fields
+# (see template.cpp). Built as variables here so Robot doesn't treat runs
+# of spaces in an inline literal as column separators.
+${NAV_INFO}       System: NAV${SPACE * 4}INFO: Position updated
+${NAV_CRITICAL}   System: NAV${SPACE * 4}CRITICAL: Position exposed
 
 *** Test Cases ***
-Test Add and Divide Functionality
-    [Documentation]    Template test case that tests various inputs for add and divide
-    [Template]     Run Target Program
-    sum 1 1        a+b == 2
-    sum 4 5        a+b == 9
-    divide 9 3     a/b == 3
-    divide 6 6     a/b == 1
-
-Test Divide By Zero
-    [Documentation]    Tests division by zero corner case that is hard to test in UT environment
-    ${result}=     Run Process    ${CLI_CMD}    divide    1    0    shell=${True}
-    Should Contain    ${result.stderr.strip()}    Floating point exception
-
-*** Keywords ***
-Run Target Program
-    [Documentation]    Runs 'main' binary, asserts no errors, and verifies output
-    [Arguments]    ${args}    ${expected_output}
-
-    # Args is treated as a string here, but if we split them by space, then they will be passed as individual arguments
-    ${split_args}=    Split String    ${args}
-
-    # Start a child process that executes our target binary, with the specified args. Capture stdout and stderr
-    ${result}=     Run Process    ${CLI_CMD}    @{split_args}    shell=${True}
-
-    # Assert that we see the expected output in stdout.
-    # We expect to see the expected output string twice: One for the C++ "Template" class, and one
-    # for the C "template_t" structure
-    Should Contain X Times    ${result.stdout.strip()}    ${expected_output}    2
-
-    # Assert that return code was 0, indicating no error
+Test Driver Runs Successfully
+    [Documentation]    Sanity check: binary runs, exits cleanly, no stderr output.
+    ${result}=    Run Process    ${CLI_CMD}    shell=${True}
     Should Be Equal As Integers    ${result.rc}    0
-
-    # Assert that stderr was empty
     Should Be Empty    ${result.stderr}
 
+Test Logging Is Silent By Default
+    [Documentation]    Before log_enabled is toggled on, no log lines should print --
+    ...                confirms the short-circuit gate actually suppresses output,
+    ...                not just that logger() would filter it.
+    ${result}=    Run Process    ${CLI_CMD}    shell=${True}
+    ${before}=    Fetch From Left    ${result.stdout}    Silent Mode Disabled
+    Should Not Contain    ${before}    System:
+
+Test Logging Enabled Shows Nav Messages
+    [Documentation]    Once setting() and set_system_log_level() run, NAV messages
+    ...                at or above the configured threshold should print.
+    ${result}=    Run Process    ${CLI_CMD}    shell=${True}
+    Should Contain    ${result.stdout}    ${NAV_INFO}
+    Should Contain    ${result.stdout}    ${NAV_CRITICAL}
+
+Test Per Subsystem Filtering
+    [Documentation]    After raising the NAV threshold to CRITICAL, the INFO message
+    ...                should stop appearing while CRITICAL keeps appearing --
+    ...                confirms per-subsystem severity filtering, not just the
+    ...                global on/off switch.
+    ${result}=    Run Process    ${CLI_CMD}    shell=${True}
+    Should Contain X Times    ${result.stdout}    ${NAV_INFO}        1
+    Should Contain X Times    ${result.stdout}    ${NAV_CRITICAL}    2
+
+Test Logging Silent Again After Disable
+    [Documentation]    Calling setting() a second time should flip log_enabled back
+    ...                to false -- confirms the toggle is a real state flip, not
+    ...                one-directional.
+    ${result}=    Run Process    ${CLI_CMD}    shell=${True}
+    ${after}=    Fetch From Right    ${result.stdout}    Silent Mode Enabled
+    Should Not Contain    ${after}    System:
