@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall -O2 CMakeFiles/template_bin.dir/src/main.cpp.o -o bin/template_bin  -Wl,-rpath,/home/brxwoodruff/cpptemplate/build_verify/lib lib/libtemplate.so 

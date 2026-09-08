@@ -1,6 +1,0 @@
-/home/brxwoodruff/cpptemplate/build_verify/CMakeFiles/template_bin.dir
-/home/brxwoodruff/cpptemplate/build_verify/CMakeFiles/edit_cache.dir
-/home/brxwoodruff/cpptemplate/build_verify/CMakeFiles/rebuild_cache.dir
-/home/brxwoodruff/cpptemplate/build_verify/src/template/CMakeFiles/template.dir
-/home/brxwoodruff/cpptemplate/build_verify/src/template/CMakeFiles/edit_cache.dir
-/home/brxwoodruff/cpptemplate/build_verify/src/template/CMakeFiles/rebuild_cache.dir
